@@ -19,9 +19,9 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 .log{font-family:ui-monospace,monospace;font-size:9px;background:#111827;color:#d1fae5;border-radius:10px;padding:7px;white-space:pre-wrap}
 </style></head><body><div class="app"><div class="hero">
 <h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9 · Closed-loop Prototype</div>
-<div id="stateBox" class="state"><div id="icon" class="icon">🦯</div><div id="title" class="title">準備開始</div><div id="instruction" class="instruction">先完成 Camera、左右腳校正與 IMU 啟用</div></div>
+<div id="stateBox" class="state"><div id="icon" class="icon">🦯</div><div id="title" class="title">準備開始</div><div id="instruction" class="instruction">先完成 Camera、腳部校正、IMU 與 Voice 啟用</div></div>
 <div class="progress"><span id="p0" class="step active">助行器</span><span class="arrow">→</span><span id="p1" class="step">患側腳</span><span class="arrow">→</span><span id="p2" class="step">健側腳</span><span class="arrow">→</span><span id="p3" class="step">完成</span></div>
-<div class="ready"><span id="rCam">Camera OFF</span><span id="rCal">Feet 未校正</span><span id="rImu">IMU OFF</span></div>
+<div class="ready"><span id="rCam">Camera OFF</span><span id="rCal">Feet 未校正</span><span id="rImu">IMU OFF</span><span id="rVoice">Voice OFF</span></div>
 <button id="reset" class="primary">↻ 重設本輪</button>
 </div>
 
@@ -40,6 +40,9 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 <div style="margin-top:8px"><div class="row"><span class="small">Vision threshold</span><b id="vTL">30%</b></div><input id="vT" type="range" min="10" max="60" value="30"></div>
 <div style="margin-top:8px"><div class="row"><span class="small">Dominance</span><b id="domL">1.35×</b></div><input id="dom" type="range" min="115" max="200" step="5" value="135"></div></div>
 
+<div class="card"><div class="row"><b>4. Voice Cue</b><span id="voiceState" class="pill">OFF</span></div>
+<div class="small">iPhone Safari 需要由使用者點擊一次來解鎖語音。正式 Demo 前請先測試。</div>
+<button id="voiceBtn" class="primary" style="margin-top:7px">🔊 啟用／測試語音</button></div>
 <div class="card"><b>Debug fallback</b><div class="debug" style="margin-top:6px"><button id="dw">WALKER</button><button id="dl">LEFT</button><button id="dr">RIGHT</button></div></div>
 <div id="log" class="log">v0.9 loaded ✓</div>
 </details></div>
@@ -48,9 +51,31 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 "use strict";(()=>{
 const $=x=>document.getElementById(x),W=160,H=200,can=document.createElement("canvas"),cx=can.getContext("2d",{willReadFrequently:true});can.width=W;can.height=H;
 let stream,running=false,last=0,base=null,baseAt=0,leftROI=null,rightROI=null,calPhase=0,samples=[],leftCal=null;
-let imuOn=false,imuThr=2.2,peak=0,state=0,walkerLock=false,visionLock=false,candidate=null,count=0,error=false;
+let imuOn=false,imuThr=2.2,peak=0,state=0,walkerLock=false,visionLock=false,candidate=null,count=0,error=false,voiceEnabled=false;
 function log(s){$("log").textContent=s}
-function say(s){try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(s);u.lang="zh-TW";u.rate=.92;speechSynthesis.speak(u)}catch(e){}}
+function speakText(text){
+ return new Promise((resolve,reject)=>{
+  try{
+   if(!("speechSynthesis" in window)) throw Error("此瀏覽器不支援 Speech Synthesis");
+   speechSynthesis.cancel();
+   let u=new SpeechSynthesisUtterance(text);u.lang="zh-TW";u.rate=.9;u.volume=1;
+   u.onend=()=>resolve();u.onerror=e=>reject(Error(e.error||"speech error"));
+   // Safari sometimes needs a tiny delay after cancel()
+   setTimeout(()=>speechSynthesis.speak(u),80);
+  }catch(e){reject(e)}
+ });
+}
+function say(text){
+ if(!voiceEnabled){log("Voice cue skipped: Voice not enabled.");return}
+ speakText(text).catch(e=>log("VOICE ERROR: "+e.message));
+}
+async function unlockVoice(){
+ try{
+  await speakText("語音提示已啟用");
+  voiceEnabled=true;$("voiceState").textContent="ON";$("rVoice").textContent="Voice ON";$("rVoice").classList.add("on");
+  log("Voice unlocked and test cue played ✓");
+ }catch(e){voiceEnabled=false;$("voiceState").textContent="ERROR";log("VOICE ERROR: "+e.message);alert("語音啟用失敗："+e.message)}
+}
 function frame(){let v=$("video");if(v.readyState<2)return null;cx.drawImage(v,0,0,W,H);let d=cx.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);for(let i=0,j=0;i<d.length;i+=4,j++)g[j]=(.299*d[i]+.587*d[i+1]+.114*d[i+2])|0;return g}
 function diff(a,b,x0,x1,y0,y1){let n=0,t=0;for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){let i=y*W+x;t++;if(Math.abs(a[i]-b[i])>=28)n++}return 100*n/t}
 function vals(f){let y0=H*.25|0,y1=H*.93|0;return[diff(f,base,W*.05|0,W*.47|0,y0,y1),diff(f,base,W*.53|0,W*.95|0,y0,y1)]}
@@ -88,8 +113,8 @@ function calibrate(){
  if(calPhase===3){setBase();samples=[];calPhase=4;$("calText").textContent="現在慢慢移動右腳…";$("calBtn").disabled=true;setTimeout(()=>{let ra=avg(samples,0),rb=avg(samples,1),normal=(leftCal[0]-leftCal[1])+(rb-ra),swap=(leftCal[1]-leftCal[0])+(ra-rb);leftROI=normal>=swap?"A":"B";rightROI=leftROI==="A"?"B":"A";calPhase=0;base=null;$("map").textContent=`L=${leftROI} R=${rightROI}`;$("rCal").textContent="Feet 已校正";$("rCal").classList.add("on");$("calText").textContent="校正完成 ✓";$("calBtn").textContent="重新校正";$("calBtn").disabled=false;log(`Mapping: LEFT=${leftROI}, RIGHT=${rightROI}`)},1200)}
 }
 async function imu(){try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){let p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw Error("Motion permission denied")}addEventListener("devicemotion",e=>{let a=e.acceleration;if(!a)return;let m=Math.hypot(a.x||0,a.y||0,a.z||0);$("cur").textContent=m.toFixed(2);if(m>peak){peak=m;$("peak").textContent=peak.toFixed(2)}if(state===0&&!walkerLock&&m>=imuThr)walker()},{passive:true});imuOn=true;$("imuState").textContent="ON";$("rImu").textContent="IMU ON";$("rImu").classList.add("on");$("imuBtn").disabled=true;log("IMU ready ✓")}catch(e){log("IMU: "+e.message);alert(e.message)}}
-function reset(){state=0;walkerLock=false;visionLock=false;base=null;candidate=null;count=0;error=false;progress(0);ui("準備開始",leftROI&&imuOn?"移動助行器開始":"先完成 Camera、左右腳校正與 IMU 啟用","🦯")}
-$("camBtn").onclick=camera;$("calBtn").onclick=calibrate;$("imuBtn").onclick=imu;$("reset").onclick=reset;$("dw").onclick=walker;$("dl").onclick=()=>foot("left");$("dr").onclick=()=>foot("right");
+function reset(){state=0;walkerLock=false;visionLock=false;base=null;candidate=null;count=0;error=false;progress(0);ui("準備開始",leftROI&&imuOn?"移動助行器開始":"先完成 Camera、腳部校正、IMU 與 Voice 啟用","🦯")}
+$("voiceBtn").onclick=unlockVoice;$("camBtn").onclick=camera;$("calBtn").onclick=calibrate;$("imuBtn").onclick=imu;$("reset").onclick=reset;$("dw").onclick=walker;$("dl").onclick=()=>foot("left");$("dr").onclick=()=>foot("right");
 $("minus").onclick=()=>{imuThr=Math.max(.1,Math.round((imuThr-.1)*10)/10);$("imuT").textContent=imuThr.toFixed(2)};$("plus").onclick=()=>{imuThr=Math.round((imuThr+.1)*10)/10;$("imuT").textContent=imuThr.toFixed(2)};
 $("vT").oninput=()=>$("vTL").textContent=$("vT").value+"%";$("dom").oninput=()=>$("domL").textContent=(+$("dom").value/100).toFixed(2)+"×";
 })();</script></body></html>
