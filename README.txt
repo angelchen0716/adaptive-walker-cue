@@ -1,15 +1,25 @@
-Adaptive Walker Cue v0.8 — Baseline Foot Displacement
+Adaptive Walker Cue v0.8.1 HOTFIX
 
-快速測試：
-1. Camera ON。
-2. 雙腳不動，按 SET BASELINE。
-3. 慢慢向前移左腳，記錄 LEFT/RIGHT CHANGE。
-4. 回原位、重新 SET BASELINE，再測右腳。
-5. 預設 Step threshold 18%、Pixel sensitivity 28，皆可調。
+這版刻意簡化，只測：
+Camera -> SET BASELINE -> LEFT/RIGHT displacement
 
-核心差異：
-v0.7 = 相鄰 frame 比較。
-v0.8 = 每一 frame 與固定 baseline 比較，所以慢速踏步也會累積出差異。
+修正重點：
+- 重寫 Camera 啟動事件。
+- 增加 getUserMedia 支援檢查。
+- 增加 Safari Camera error diagnostic。
+- 移除 IMU / sequence engine，避免其他 JavaScript 錯誤影響 Camera button。
+- Baseline tracking 保留。
 
-Walker 自動模式：
-IMU Walker event → 350 ms → baseline → 第一腳辨識。
+測試：
+1. 上傳 index.html 到 GitHub repo 根目錄，取代舊版。
+2. 等 Pages deployment 完成。
+3. Safari 開 ?v=81。
+4. 點「啟用後鏡頭」。
+5. Diagnostic 應先顯示：
+   Start button tapped. Requesting camera permission…
+   接著成功時：
+   Camera started successfully.
+6. 雙腳站好 -> SET BASELINE -> 慢慢移左腳/右腳。
+7. 記錄 LEFT CHANGE / RIGHT CHANGE。
+
+若 Camera 失敗，直接把 Diagnostic 的 CAMERA ERROR 文字或截圖傳回來。
