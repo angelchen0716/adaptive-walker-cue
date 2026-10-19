@@ -1,26 +1,31 @@
-Adaptive Walker Cue v0.6 — Vision Step Detection
+Adaptive Walker Cue v0.7 — Fast Foot Motion Tracking
 
-新增：
-- MediaPipe Pose 在瀏覽器內進行人體姿勢 landmark detection。
-- 顯示左右 ankle / heel / foot-index landmarks。
-- IMU 偵測 WALKER 後，建立雙腳 baseline。
-- 追蹤左右腳 landmark 位移，嘗試自動產生 LEFT STEP / RIGHT STEP。
-- 患側可選左/右。
-- Foot movement threshold 可調。
-- 保留 WALKER / LEFT / RIGHT Debug fallback。
+Why v0.7:
+v0.6 的 full-body pose model 在「walker 中央、鏡頭斜向後下方、只看到下肢」的第一人稱/局部人體視野下不穩。
+v0.7 改成 task-specific ROI motion detection，不需要辨識完整人體。
 
-GitHub：
-1. 以新版 index.html 取代 repository 根目錄舊檔。
-2. Commit changes，等待 Pages deployment。
-3. iPhone Safari 使用 ?v=6 開啟。
-4. 先啟用「鏡頭＋姿勢辨識」，第一次載入需要網路下載 MediaPipe 模型。
-5. 確認畫面在腳踝/腳跟/足部出現 landmarks。
-6. 再啟用 IMU。
-7. Walker 前移後停穩，約 0.45 秒後建立 baseline，再移動一腳。
-8. 觀察 LEFT MOVE / RIGHT MOVE 與是否自動觸發 STEP。
+原理：
+Camera → LEFT/RIGHT ROI → frame difference → motion % → LEFT/RIGHT event
+IMU → WALKER event
+Sequence engine → Walker → affected → unaffected
 
-重要：
-- v0.6 是實驗性 PoC，不可宣稱已有臨床準確度。
-- 預設 foot threshold 0.035 是初始測試值，需要依實機角度校正。
-- 若自動辨識不穩定，使用 Debug fallback 完整展示 sequence engine。
-- MediaPipe 資源目前由 CDN 載入，因此第一次開啟需網路；決賽前可再做離線化版本。
+建議手機位置：
+- walker 前方上橫桿中央
+- 後鏡頭朝使用者方向、斜向下
+- 畫面應包含左右鞋、小腿下段，以及腳前後移動空間
+
+測試：
+1. 上傳 index.html 到 GitHub Pages root，網址加 ?v=7。
+2. 啟用 Camera。
+3. 靜止：記錄 LEFT/RIGHT MOTION 背景值。
+4. 單獨動左腳：記錄 L/R motion。
+5. 單獨動右腳：記錄 L/R motion。
+6. 預設 motion threshold 12%、pixel sensitivity 28 只是起始值。
+7. 再啟用 IMU，測 Walker → 左/右第一步。
+8. Debug buttons 永久保留作 fallback。
+
+限制：
+- 目前左右 ROI 固定，實際 walker mounting 後可能需要調 ROI。
+- 光影劇烈改變、walker 本身進入 ROI、相機持續震動都會造成 frame-difference false positive。
+- v0.7 先專注辨識 Walker 後「第一個移動的腳」；完整第二步自動偵測可在校正穩定後加入。
+- 不可宣稱臨床辨識準確度。
