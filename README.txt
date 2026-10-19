@@ -1,17 +1,30 @@
-Adaptive Walker Cue v0.8.2
+Adaptive Walker Cue v0.9 — Closed-loop Prototype
 
-新增：
-- Left/Right calibration：不假設畫面 ROI 與實際左右腳 mapping。
-- 預設 step threshold 30%。
-- Dominance gate 1.35x。
-- 必須連續 2 次分析確認才輸出 STEP。
-- 兩側同時大幅變化或 dominance 不足時：不判定，不硬猜。
+核心流程：
+Walker IMU event
+→ 350 ms settle
+→ Vision baseline
+→ 偵測第一腳
+→ 若健側先走：語音「請先移動患側腳」並重新 baseline
+→ 患側正確：重新 baseline
+→ 偵測健側
+→ 完成本輪
+→ 約 1.6 秒後 reset
 
-建議測試：
-1. Camera ON。
-2. 開始左右腳校正。
-3. 依畫面指示先左腳、再右腳。
-4. 校正完成後確認 Mapping。
-5. SET TEST BASELINE。
-6. 分別移左腳/右腳各 5 次，記錄是否仍有左右顛倒。
-7. 若失敗，截圖當時 ROI A/B 數值與 Confidence。
+使用順序：
+1. Camera ON
+2. 左右腳校正
+3. 選擇患側
+4. IMU ON
+5. 正式測試
+
+建議先用 Debug WALKER 測 Vision 完整閉環，確認穩定後才用真實 IMU 觸發。
+
+決賽 demo 保險：
+Engineering Mode 內保留 WALKER / LEFT / RIGHT debug buttons。
+若現場感測受環境影響，仍可示範 interaction logic。
+
+注意：
+- Vision threshold 30%、dominance 1.35x 為 PoC calibration parameters。
+- IMU threshold 2.20 m/s² 需裝上 walker 後重新校正。
+- 不代表臨床驗證或準確率。
