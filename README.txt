@@ -1,25 +1,17 @@
-Adaptive Walker Cue v0.8.1 HOTFIX
+Adaptive Walker Cue v0.8.2
 
-這版刻意簡化，只測：
-Camera -> SET BASELINE -> LEFT/RIGHT displacement
+新增：
+- Left/Right calibration：不假設畫面 ROI 與實際左右腳 mapping。
+- 預設 step threshold 30%。
+- Dominance gate 1.35x。
+- 必須連續 2 次分析確認才輸出 STEP。
+- 兩側同時大幅變化或 dominance 不足時：不判定，不硬猜。
 
-修正重點：
-- 重寫 Camera 啟動事件。
-- 增加 getUserMedia 支援檢查。
-- 增加 Safari Camera error diagnostic。
-- 移除 IMU / sequence engine，避免其他 JavaScript 錯誤影響 Camera button。
-- Baseline tracking 保留。
-
-測試：
-1. 上傳 index.html 到 GitHub repo 根目錄，取代舊版。
-2. 等 Pages deployment 完成。
-3. Safari 開 ?v=81。
-4. 點「啟用後鏡頭」。
-5. Diagnostic 應先顯示：
-   Start button tapped. Requesting camera permission…
-   接著成功時：
-   Camera started successfully.
-6. 雙腳站好 -> SET BASELINE -> 慢慢移左腳/右腳。
-7. 記錄 LEFT CHANGE / RIGHT CHANGE。
-
-若 Camera 失敗，直接把 Diagnostic 的 CAMERA ERROR 文字或截圖傳回來。
+建議測試：
+1. Camera ON。
+2. 開始左右腳校正。
+3. 依畫面指示先左腳、再右腳。
+4. 校正完成後確認 Mapping。
+5. SET TEST BASELINE。
+6. 分別移左腳/右腳各 5 次，記錄是否仍有左右顛倒。
+7. 若失敗，截圖當時 ROI A/B 數值與 Confidence。

@@ -1,215 +1,135 @@
 <!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Adaptive Walker Cue v0.8.1</title>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Adaptive Walker Cue v0.8.2</title>
 <style>
-*{box-sizing:border-box} body{margin:0;padding:14px;background:#f5f5f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937}
-.app{max-width:470px;margin:auto;background:#fff;padding:18px 16px;border-radius:24px}
-h1{text-align:center;font-size:22px;margin:0}.sub{text-align:center;font-size:13px;color:#6b7280;margin:6px 0 14px}
-.card{background:#f7f7f5;border-radius:16px;padding:13px;margin:11px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.small{font-size:11px;color:#6b7280;line-height:1.45}.pill{font-size:11px;font-weight:700;background:#e8e8e3;border-radius:999px;padding:5px 8px}
-button{border:0;border-radius:13px;min-height:46px;font-weight:650;touch-action:manipulation}.primary{width:100%;margin-top:8px;background:#25364a;color:white;font-size:15px}.secondary{background:white;border:1px solid #d1d5db;color:#374151}
-.camera{position:relative;aspect-ratio:3/4;background:#111;border-radius:16px;overflow:hidden;margin-top:9px}
-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.roi{position:absolute;top:25%;height:68%;width:42%;border:2px dashed rgba(255,255,255,.9);border-radius:16px;pointer-events:none}.roiL{left:5%}.roiR{right:5%}.roi span{display:block;text-align:center;color:#fff;font-size:11px;font-weight:700;margin-top:6px;text-shadow:0 1px 3px #000}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.motion{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;text-align:center}.motion b{display:block;font-size:20px;margin-top:3px}.hot{background:#eaf7ef;border-color:#a9d8b8}
-.setting{margin-top:10px} input[type=range]{width:100%}
-.status{text-align:center;background:#eef4fb;padding:16px;border-radius:17px}.ok{background:#eaf7ef}.error{background:#fdecec;color:#991b1b}
-.log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;background:#111827;color:#d1fae5;border-radius:12px;padding:9px;min-height:38px;white-space:pre-wrap}
-.note{text-align:center;color:#9ca3af;font-size:9.5px;line-height:1.45;margin-top:10px}
-</style>
-</head>
-<body>
-<div class="app">
-<h1>ADAPTIVE WALKER CUE</h1>
-<div class="sub">v0.8.1 · Camera Hotfix + Baseline Test</div>
+*{box-sizing:border-box}body{margin:0;padding:14px;background:#f5f5f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937}
+.app{max-width:480px;margin:auto;background:#fff;padding:18px 16px;border-radius:24px}
+h1{text-align:center;font-size:22px;margin:0}.sub{text-align:center;color:#6b7280;font-size:13px;margin:6px 0 14px}
+.card{background:#f7f7f5;padding:13px;border-radius:16px;margin:11px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.small{font-size:11px;color:#6b7280;line-height:1.45}.pill{font-size:11px;font-weight:700;background:#e8e8e3;padding:5px 8px;border-radius:99px}
+button{border:0;border-radius:13px;min-height:46px;font-weight:650;touch-action:manipulation}.primary{width:100%;background:#25364a;color:white;margin-top:8px}.secondary{background:#fff;border:1px solid #d1d5db;color:#374151}
+.camera{position:relative;aspect-ratio:3/4;background:#111;border-radius:16px;overflow:hidden;margin-top:9px}video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.roi{position:absolute;top:25%;height:68%;width:42%;border:2px dashed #fff;border-radius:16px;pointer-events:none}.roiA{left:5%}.roiB{right:5%}.roi span{display:block;text-align:center;color:#fff;font-size:11px;font-weight:750;margin-top:6px;text-shadow:0 1px 3px #000}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.motion{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;text-align:center}.motion b{display:block;font-size:20px}.hot{background:#eaf7ef;border-color:#a9d8b8}
+.status{text-align:center;background:#eef4fb;border-radius:17px;padding:16px}.ok{background:#eaf7ef;color:#166534}.warn{background:#fff5df;color:#92400e}
+.big{font-size:21px;font-weight:750}.setting{margin-top:10px}input[type=range]{width:100%}
+.calstep{padding:10px;background:#fff;border-radius:12px;border:1px solid #e5e7eb;margin-top:8px}.calstep strong{display:block;margin-bottom:3px}
+.conf{font-size:12px;text-align:center;margin-top:8px}.log{font-family:ui-monospace,monospace;font-size:10px;background:#111827;color:#d1fae5;border-radius:12px;padding:8px;white-space:pre-wrap;min-height:35px}
+.note{text-align:center;font-size:9.5px;color:#9ca3af;line-height:1.45;margin-top:10px}
+</style></head><body><div class="app">
+<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.8.2 · Left/Right Calibration + Confidence Gate</div>
 
 <div class="card">
-  <div class="row"><div><b>📷 Rear Camera</b><div class="small" id="cameraMessage">尚未啟用</div></div><span class="pill" id="cameraState">OFF</span></div>
-  <button type="button" class="primary" id="startCameraButton">啟用後鏡頭</button>
-  <div class="camera" id="cameraView" hidden>
-    <video id="cameraVideo" autoplay muted playsinline></video>
-    <div class="roi roiL"><span>LEFT ROI</span></div>
-    <div class="roi roiR"><span>RIGHT ROI</span></div>
-  </div>
-  <div class="two" style="margin-top:8px">
-    <button type="button" class="secondary" id="setBaselineButton" disabled>📸 SET BASELINE</button>
-    <button type="button" class="secondary" id="stopCameraButton" disabled>停止鏡頭</button>
-  </div>
+<div class="row"><div><b>📷 Camera</b><div class="small" id="camMsg">尚未啟用</div></div><span class="pill" id="camState">OFF</span></div>
+<button class="primary" id="camBtn">啟用後鏡頭</button>
+<div class="camera" id="camView" hidden><video id="video" autoplay playsinline muted></video><div class="roi roiA"><span>ROI A</span></div><div class="roi roiB"><span>ROI B</span></div></div>
 </div>
 
 <div class="card">
- <div class="row"><b>Change vs Baseline</b><span class="pill" id="baselineState">NO BASELINE</span></div>
- <div class="two" style="margin-top:8px">
-   <div class="motion" id="leftBox"><span class="small">LEFT CHANGE</span><b id="leftValue">0.0%</b></div>
-   <div class="motion" id="rightBox"><span class="small">RIGHT CHANGE</span><b id="rightValue">0.0%</b></div>
- </div>
- <div class="setting"><div class="row"><span class="small">Step threshold</span><b id="stepThresholdLabel">18%</b></div><input id="stepThreshold" type="range" min="5" max="45" step="1" value="18"></div>
- <div class="setting"><div class="row"><span class="small">Pixel sensitivity</span><b id="pixelThresholdLabel">28</b></div><input id="pixelThreshold" type="range" min="10" max="70" step="2" value="28"></div>
+<div class="row"><b>① 左右腳自動校正</b><span class="pill" id="mapState">NOT CALIBRATED</span></div>
+<div class="calstep"><strong id="calTitle">先啟用 Camera</strong><span class="small" id="calText">之後按「開始校正」。</span></div>
+<button class="primary" id="calBtn" disabled>開始左右腳校正</button>
+<div class="two" style="margin-top:8px"><div class="motion"><span class="small">ROI A</span><b id="aVal">0.0%</b></div><div class="motion"><span class="small">ROI B</span><b id="bVal">0.0%</b></div></div>
+<div class="small" id="mapping" style="margin-top:8px;text-align:center">Mapping：尚未建立</div>
 </div>
-
-<div id="result" class="status"><b>先啟用 Camera</b><div class="small">成功後再按 SET BASELINE</div></div>
 
 <div class="card">
- <b>Diagnostic</b>
- <div id="log" class="log">JavaScript loaded…</div>
- <div class="small" style="margin-top:7px">若 Camera 仍無法開啟，這裡會直接顯示錯誤原因，方便定位 Safari 權限／HTTPS／裝置問題。</div>
+<div class="row"><b>② Step Detection Test</b><span class="pill" id="detectState">WAITING</span></div>
+<button class="secondary" id="baseBtn" style="width:100%" disabled>📸 SET TEST BASELINE</button>
+<div id="result" class="status" style="margin-top:8px"><div class="big">等待校正</div><div class="small">校正後可測 LEFT / RIGHT STEP</div></div>
+<div class="conf" id="confidence">Confidence：—</div>
+
+<div class="setting"><div class="row"><span class="small">Step threshold</span><b id="thrLabel">30%</b></div><input id="thr" type="range" min="10" max="60" step="1" value="30"></div>
+<div class="setting"><div class="row"><span class="small">Dominance ratio</span><b id="domLabel">1.35×</b></div><input id="dom" type="range" min="115" max="200" step="5" value="135"></div>
+<div class="setting"><div class="row"><span class="small">Pixel sensitivity</span><b id="pixLabel">28</b></div><input id="pix" type="range" min="10" max="70" step="2" value="28"></div>
+<div class="small" style="margin-top:7px">必須連續 2 次分析都符合 threshold + dominance 才正式判定，避免單幀光影造成左右誤判。</div>
 </div>
 
-<div class="note">v0.8.1 先刻意移除 IMU 與完整步序邏輯，只驗證 Camera → Baseline → Left/Right displacement。這條穩定後再接回 v0.8 的 IMU。</div>
+<div class="card"><b>Diagnostic</b><div class="log" id="log">v0.8.2 loaded ✓</div></div>
+<div class="note">本版只驗證左右 mapping 與可靠 step event。若兩個 ROI 同時大量變化，系統會選擇「不判定」而不是硬猜。</div>
 </div>
 
 <script>
 "use strict";
-(function(){
-  const el = id => document.getElementById(id);
-  const log = msg => { el("log").textContent = msg; console.log(msg); };
+(()=>{
+const $=id=>document.getElementById(id), W=160,H=200;
+const work=document.createElement("canvas");work.width=W;work.height=H;
+const ctx=work.getContext("2d",{willReadFrequently:true});
+let stream=null,running=false,baseline=null,last=0;
+let calPhase=0, leftROI=null, rightROI=null, calSamples=[], stableCount=0, candidate=null;
 
-  let mediaStream = null;
-  let running = false;
-  let baseline = null;
-  let lastAnalysis = 0;
-
-  const W=160, H=200;
-  const work = document.createElement("canvas");
-  work.width=W; work.height=H;
-  const ctx = work.getContext("2d", {willReadFrequently:true});
-
-  function getGrayFrame(){
-    const video=el("cameraVideo");
-    if(!video || video.readyState < 2) return null;
-    ctx.drawImage(video,0,0,W,H);
-    const data=ctx.getImageData(0,0,W,H).data;
-    const gray=new Uint8Array(W*H);
-    for(let i=0,j=0;i<data.length;i+=4,j++){
-      gray[j]=Math.round(0.299*data[i]+0.587*data[i+1]+0.114*data[i+2]);
-    }
-    return gray;
-  }
-
-  function roiChange(cur,base,x0,x1,y0,y1,pixelThreshold){
-    let changed=0,total=0;
-    for(let y=y0;y<y1;y+=2){
-      for(let x=x0;x<x1;x+=2){
-        const i=y*W+x;
-        total++;
-        if(Math.abs(cur[i]-base[i]) >= pixelThreshold) changed++;
-      }
-    }
-    return total ? changed/total*100 : 0;
-  }
-
-  function setResult(left,right){
-    el("leftValue").textContent=left.toFixed(1)+"%";
-    el("rightValue").textContent=right.toFixed(1)+"%";
-    const threshold=Number(el("stepThreshold").value);
-    el("leftBox").classList.toggle("hot",left>=threshold && left>right*1.15);
-    el("rightBox").classList.toggle("hot",right>=threshold && right>left*1.15);
-
-    if(left>=threshold && left>right*1.15){
-      el("result").className="status ok";
-      el("result").innerHTML="<b>LEFT STEP DETECTED ✓</b><div class='small'>左側相對 baseline 的變化較大</div>";
-    } else if(right>=threshold && right>left*1.15){
-      el("result").className="status ok";
-      el("result").innerHTML="<b>RIGHT STEP DETECTED ✓</b><div class='small'>右側相對 baseline 的變化較大</div>";
-    } else {
-      el("result").className="status";
-      el("result").innerHTML="<b>Monitoring…</b><div class='small'>等待其中一側出現足夠 displacement</div>";
-    }
-  }
-
-  function analysisLoop(ts){
-    if(!running) return;
-    if(baseline && ts-lastAnalysis > 100){
-      lastAnalysis=ts;
-      const cur=getGrayFrame();
-      if(cur){
-        const p=Number(el("pixelThreshold").value);
-        const y0=Math.floor(H*.25), y1=Math.floor(H*.93);
-        const left=roiChange(cur,baseline,Math.floor(W*.05),Math.floor(W*.47),y0,y1,p);
-        const right=roiChange(cur,baseline,Math.floor(W*.53),Math.floor(W*.95),y0,y1,p);
-        setResult(left,right);
-      }
-    }
-    requestAnimationFrame(analysisLoop);
-  }
-
-  async function startCamera(){
-    log("Start button tapped. Requesting camera permission…");
-    try{
-      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        throw new Error("此瀏覽器沒有 getUserMedia。請使用 HTTPS GitHub Pages + Safari。");
-      }
-      if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
-
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio:false,
-        video:{
-          facingMode:{ideal:"environment"},
-          width:{ideal:640},
-          height:{ideal:480}
-        }
-      });
-
-      const video=el("cameraVideo");
-      video.srcObject=mediaStream;
-      await video.play();
-
-      running=true;
-      baseline=null;
-      el("cameraView").hidden=false;
-      el("cameraState").textContent="ON";
-      el("cameraMessage").textContent="後鏡頭已啟用";
-      el("startCameraButton").textContent="✓ Camera 已啟用";
-      el("setBaselineButton").disabled=false;
-      el("stopCameraButton").disabled=false;
-      el("baselineState").textContent="NO BASELINE";
-      el("result").innerHTML="<b>Camera OK ✓</b><div class='small'>雙腳站好後按 SET BASELINE</div>";
-      log("Camera started successfully.");
-      requestAnimationFrame(analysisLoop);
-    }catch(err){
-      el("cameraState").textContent="ERROR";
-      el("cameraMessage").textContent="啟用失敗";
-      log("CAMERA ERROR: "+(err && err.name ? err.name+": " : "")+(err && err.message ? err.message : String(err)));
-      alert("無法啟用鏡頭：\\n"+(err.message || err));
-    }
-  }
-
-  function stopCamera(){
-    running=false;
-    baseline=null;
-    if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
-    mediaStream=null;
-    el("cameraVideo").srcObject=null;
-    el("cameraView").hidden=true;
-    el("cameraState").textContent="OFF";
-    el("cameraMessage").textContent="尚未啟用";
-    el("startCameraButton").textContent="啟用後鏡頭";
-    el("setBaselineButton").disabled=true;
-    el("stopCameraButton").disabled=true;
-    el("baselineState").textContent="NO BASELINE";
-    setResult(0,0);
-    log("Camera stopped.");
-  }
-
-  function setBaseline(){
-    const f=getGrayFrame();
-    if(!f){ log("Baseline failed: video frame not ready."); return; }
-    baseline=new Uint8Array(f);
-    el("baselineState").textContent="BASELINE SET";
-    setResult(0,0);
-    log("Baseline captured. Move ONE foot slowly.");
-  }
-
-  el("startCameraButton").addEventListener("click",startCamera);
-  el("stopCameraButton").addEventListener("click",stopCamera);
-  el("setBaselineButton").addEventListener("click",setBaseline);
-  el("stepThreshold").addEventListener("input",()=>el("stepThresholdLabel").textContent=el("stepThreshold").value+"%");
-  el("pixelThreshold").addEventListener("input",()=>el("pixelThresholdLabel").textContent=el("pixelThreshold").value);
-
-  log("v0.8.1 ready. Camera button handler attached ✓");
+function log(s){$("log").textContent=s;console.log(s)}
+function frame(){
+ let v=$("video"); if(v.readyState<2)return null;
+ ctx.drawImage(v,0,0,W,H); let d=ctx.getImageData(0,0,W,H).data,g=new Uint8Array(W*H);
+ for(let i=0,j=0;i<d.length;i+=4,j++)g[j]=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]); return g;
+}
+function change(cur,base,x0,x1,y0,y1,p){
+ let n=0,t=0; for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){let i=y*W+x;t++;if(Math.abs(cur[i]-base[i])>=p)n++}return 100*n/t;
+}
+function values(cur){
+ let p=+$("pix").value,y0=H*.25|0,y1=H*.93|0;
+ return [change(cur,baseline,W*.05|0,W*.47|0,y0,y1,p),change(cur,baseline,W*.53|0,W*.95|0,y0,y1,p)];
+}
+function setBase(){let f=frame();if(!f)return false;baseline=new Uint8Array(f);stableCount=0;candidate=null;return true}
+function physical(v){return leftROI==="A"?{left:v[0],right:v[1]}:{left:v[1],right:v[0]}}
+function confidence(primary,other){
+ let ratio=primary/(other+0.1); return Math.min(99,Math.round((ratio/2)*100));
+}
+function detect(v){
+ if(!leftROI)return;
+ let p=physical(v),t=+$("thr").value,d=+$("dom").value/100, cand=null,pri=0,oth=0;
+ if(p.left>=t && p.left>p.right*d){cand="LEFT";pri=p.left;oth=p.right}
+ else if(p.right>=t && p.right>p.left*d){cand="RIGHT";pri=p.right;oth=p.left}
+ if(cand){
+   if(candidate===cand)stableCount++; else{candidate=cand;stableCount=1}
+   let cf=confidence(pri,oth);$("confidence").textContent="Confidence："+cf+"% · "+cand+" candidate · "+stableCount+"/2";
+   if(stableCount>=2){$("result").className="status ok";$("result").innerHTML="<div class='big'>"+cand+" STEP ✓</div><div class='small'>連續確認通過</div>";$("detectState").textContent="DETECTED"}
+ }else{
+   candidate=null;stableCount=0;$("confidence").textContent="Confidence：不足 → 不判定";
+   $("result").className="status warn";$("result").innerHTML="<div class='big'>Monitoring…</div><div class='small'>左右差異不足時不猜測</div>";$("detectState").textContent="MONITORING";
+ }
+}
+function loop(ts){
+ if(!running)return;
+ if(ts-last>110){last=ts;if(baseline){let f=frame();if(f){let v=values(f);$("aVal").textContent=v[0].toFixed(1)+"%";$("bVal").textContent=v[1].toFixed(1)+"%";
+   if(calPhase===2||calPhase===4) calSamples.push(v);
+   if(calPhase===0 && leftROI) detect(v);
+ }}}
+ requestAnimationFrame(loop);
+}
+async function camera(){
+ try{
+  log("Requesting camera…");
+  stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:640},height:{ideal:480}}});
+  $("video").srcObject=stream;await $("video").play();running=true;$("camView").hidden=false;$("camState").textContent="ON";$("camMsg").textContent="Camera ready";$("camBtn").disabled=true;$("calBtn").disabled=false;$("calTitle").textContent="Camera OK ✓";$("calText").textContent="雙腳站好不動，再開始校正。";log("Camera started ✓");requestAnimationFrame(loop);
+ }catch(e){$("camState").textContent="ERROR";log("CAMERA ERROR: "+e.name+" "+e.message);alert(e.message)}
+}
+function avg(arr,k){return arr.reduce((s,v)=>s+v[k],0)/Math.max(1,arr.length)}
+function calibrate(){
+ if(calPhase===0){
+   if(!setBase())return;calSamples=[];calPhase=1;$("calTitle").textContent="準備：只移動左腳";$("calText").textContent="按下一步後，請在約 1 秒內慢慢把左腳往前移。";$("calBtn").textContent="▶ 開始記錄左腳";return;
+ }
+ if(calPhase===1){
+   setBase();calSamples=[];calPhase=2;$("calTitle").textContent="現在移動左腳";$("calText").textContent="記錄中…";$("calBtn").disabled=true;
+   setTimeout(()=>{calPhase=3;let a=avg(calSamples,0),b=avg(calSamples,1);window.leftCal=[a,b];$("calTitle").textContent="左腳記錄完成";$("calText").textContent=`ROI A ${a.toFixed(1)}% / ROI B ${b.toFixed(1)}%。雙腳回原位後按下一步。`;$("calBtn").disabled=false;$("calBtn").textContent="下一步：右腳";},1200);return;
+ }
+ if(calPhase===3){
+   setBase();calSamples=[];calPhase=4;$("calTitle").textContent="現在移動右腳";$("calText").textContent="記錄中…";$("calBtn").disabled=true;
+   setTimeout(()=>{calPhase=5;let ra=avg(calSamples,0),rb=avg(calSamples,1),la=window.leftCal[0],lb=window.leftCal[1];
+     // score both possible mappings using intended-foot dominance across both calibration trials
+     let normal=(la-lb)+(rb-ra), swapped=(lb-la)+(ra-rb);
+     if(normal>=swapped){leftROI="A";rightROI="B"}else{leftROI="B";rightROI="A"}
+     $("mapState").textContent="CALIBRATED";$("mapping").textContent=`Mapping：LEFT = ROI ${leftROI} ｜ RIGHT = ROI ${rightROI}`;
+     $("calTitle").textContent="校正完成 ✓";$("calText").textContent=`右腳：ROI A ${ra.toFixed(1)}% / ROI B ${rb.toFixed(1)}%。現在可做 Step Test。`;
+     $("calBtn").disabled=false;$("calBtn").textContent="重新校正";$("baseBtn").disabled=false;calPhase=0;baseline=null;
+     log(`Calibration done. LEFT=ROI ${leftROI}, RIGHT=ROI ${rightROI}`);
+   },1200);return;
+ }
+}
+$("camBtn").addEventListener("click",camera);$("calBtn").addEventListener("click",calibrate);
+$("baseBtn").addEventListener("click",()=>{if(setBase()){$("detectState").textContent="MONITORING";$("result").className="status";$("result").innerHTML="<div class='big'>Baseline Set ✓</div><div class='small'>現在只移動一隻腳</div>";log("Test baseline captured.")}});
+$("thr").oninput=()=>$("thrLabel").textContent=$("thr").value+"%";$("dom").oninput=()=>$("domLabel").textContent=(+$("dom").value/100).toFixed(2)+"×";$("pix").oninput=()=>$("pixLabel").textContent=$("pix").value;
 })();
-</script>
-</body></html>
+</script></body></html>
