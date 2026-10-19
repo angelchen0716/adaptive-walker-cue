@@ -1,232 +1,27 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f5f5f2">
-<title>Adaptive Walker Cue v0.3</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f2;color:#1f2937;padding:18px;display:flex;justify-content:center}
-.app{width:100%;max-width:440px;background:#fff;border-radius:26px;padding:24px 20px;align-self:flex-start;box-shadow:0 10px 35px rgba(0,0,0,.08)}
-h1{margin:0;text-align:center;font-size:23px;letter-spacing:.8px}
-.subtitle{text-align:center;color:#6b7280;margin:7px 0 18px;font-size:14px}
-.modebox{background:#f7f7f5;border-radius:17px;padding:14px;margin-bottom:15px}
-.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
-.small{font-size:13px;color:#6b7280}
-.pill{font-size:12px;font-weight:700;padding:5px 9px;border-radius:999px;background:#e8e8e3}
-button{border:0;border-radius:16px;font-size:17px;font-weight:650;min-height:56px;cursor:pointer;touch-action:manipulation}
-.permission{width:100%;background:#25364a;color:white;margin-top:12px}
-.permission.enabled{background:#eaf7ef;color:#166534}
-.status{border-radius:20px;padding:22px 14px;text-align:center;margin:16px 0}
-.waiting{background:#eef4fb;color:#1e3a5f}.error{background:#fdecec;color:#991b1b}.correct{background:#eaf7ef;color:#166534}
-.icon{font-size:39px;margin-bottom:7px}.title{font-size:22px;font-weight:750}.instruction{margin-top:7px;color:#5f6771;min-height:22px}
-.sensor{background:#fafafa;border:1px solid #e5e7eb;border-radius:16px;padding:13px;margin-bottom:16px}
-.meter{height:9px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:9px 0 6px}
-.bar{height:100%;width:0%;background:#6b7280;transition:width .06s linear}
-.sensorline{display:flex;justify-content:space-between;font-size:13px;color:#6b7280}
-.sequence{text-align:center;color:#6b7280;font-size:13px;margin:14px 0}
-.sequence span{display:block;color:#374151;font-size:16px;font-weight:650;margin-top:5px;min-height:22px}
-.foot{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.affected{background:#dce9f5;color:#20364d}.unaffected{background:#e8e8e3;color:#30302d}
-.debug{width:100%;background:#f3f4f6;color:#4b5563;margin-top:11px;min-height:48px;font-size:14px}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}
-.secondary{background:white;border:1px solid #d1d5db;color:#6b7280;min-height:47px;font-size:14px}
-.note{text-align:center;color:#9ca3af;font-size:11px;margin-top:14px;line-height:1.45}
-</style>
-</head>
-<body>
-<div class="app">
-<h1>ADAPTIVE WALKER CUE</h1>
-<div class="subtitle">v0.3 · Smartphone IMU Prototype</div>
-
-<div class="modebox">
-  <div class="row">
-    <div><strong>📱 動作感測</strong><div class="small" id="sensorSupport">尚未啟用</div></div>
-    <span class="pill" id="sensorState">OFF</span>
-  </div>
-  <button class="permission" id="enableMotion">啟用手機動作感測</button>
-</div>
-
-<div id="status" class="status waiting">
-  <div id="icon" class="icon">🦯</div>
-  <div id="title" class="title">等待助行器</div>
-  <div id="instruction" class="instruction">啟用感測後，推動手機／助行器</div>
-</div>
-
-<div class="sensor">
-  <div class="sensorline">
-    <span>IMU movement intensity</span>
-    <strong id="motionValue">0.00</strong>
-  </div>
-  <div class="meter"><div class="bar" id="bar"></div></div>
-  <div class="sensorline">
-    <span>偵測門檻</span><span id="thresholdLabel">2.20 m/s²</span>
-  </div>
-</div>
-
-<div class="sequence">本輪步序<span id="sequence">—</span></div>
-
-<div class="foot">
-  <button class="affected" id="affected">🦶 患側腳</button>
-  <button class="unaffected" id="unaffected">🦶 健側腳</button>
-</div>
-
-<button class="debug" id="manualWalker">🧪 Debug：手動模擬助行器前移</button>
-
-<div class="controls">
-  <button class="secondary" id="voiceToggle">🔊 語音：開</button>
-  <button class="secondary" id="reset">↻ 重設本輪</button>
-</div>
-
-<div class="note">
-Prototype：手機 IMU 僅用於驗證助行器移動事件。<br>
-患側／健側腳按鈕仍為模擬事件。決賽請保留 Debug 模式作為備援。
-</div>
-</div>
-
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Adaptive Walker Cue v0.4</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f5f5f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937;padding:16px}.app{max-width:450px;margin:auto;background:white;padding:22px 18px;border-radius:26px;box-shadow:0 10px 35px #0001}h1{text-align:center;font-size:23px;margin:0}.sub{text-align:center;color:#6b7280;font-size:13px;margin:6px 0 16px}.card{background:#f7f7f5;border-radius:17px;padding:14px;margin:12px 0}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.small{font-size:12px;color:#6b7280}button{border:0;border-radius:14px;font-weight:650;touch-action:manipulation}.enable{width:100%;min-height:50px;margin-top:10px;background:#25364a;color:white;font-size:16px}.status{text-align:center;padding:20px;border-radius:20px;background:#eef4fb}.error{background:#fdecec;color:#991b1b}.ok{background:#eaf7ef;color:#166534}.ico{font-size:36px}.title{font-size:21px;font-weight:750}.inst{font-size:14px;margin-top:5px;color:#5f6771}.vals{display:grid;grid-template-columns:1fr 1fr;gap:9px}.val{background:white;border:1px solid #e5e7eb;border-radius:14px;text-align:center;padding:11px}.num{font-size:25px;font-weight:750}.threshold{display:grid;grid-template-columns:55px 1fr 55px;gap:8px;align-items:center;margin-top:12px}.adj{height:48px;font-size:24px}.center{text-align:center}.center strong{font-size:22px}.foot{display:grid;grid-template-columns:1fr 1fr;gap:9px}.foot button{min-height:58px;font-size:17px}.aff{background:#dce9f5}.unaff{background:#e8e8e3}.wide{width:100%;min-height:43px;margin-top:9px}.seq{text-align:center;font-size:13px;color:#6b7280;margin:12px}.seq b{display:block;color:#374151;font-size:16px}.calrow{display:grid;grid-template-columns:1fr 72px 76px;gap:6px;align-items:center;margin-top:8px;font-size:13px}.cv{text-align:center;background:white;padding:8px;border-radius:9px}.cap{min-height:36px;background:#25364a;color:white}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}.secondary{min-height:43px;background:white;border:1px solid #d1d5db}.lock{text-align:center;font-size:12px;color:#6b7280;margin-top:9px}.note{text-align:center;font-size:10px;color:#9ca3af;margin-top:12px}</style></head><body><div class="app">
+<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.4 · IMU Calibration & Trigger Lock</div>
+<div class="card"><div class="row"><b>📱 動作感測</b><span id="sensor">OFF</span></div><div class="small" id="sensorMsg">尚未啟用</div><button class="enable" id="enable">啟用手機動作感測</button></div>
+<div class="status" id="status"><div class="ico" id="ico">🦯</div><div class="title" id="title">等待助行器</div><div class="inst" id="inst">啟用感測後，推動手機／助行器</div></div>
+<div class="card"><div class="vals"><div class="val"><div class="small">CURRENT</div><div class="num" id="current">0.00</div></div><div class="val"><div class="small">PEAK HOLD</div><div class="num" id="peak">0.00</div></div></div>
+<div class="small" style="text-align:center;margin-top:11px">Detection threshold</div><div class="threshold"><button class="adj" id="minus">−</button><div class="center"><strong id="thr">2.20</strong><div class="small">m/s²</div></div><button class="adj" id="plus">＋</button></div><div class="lock">Trigger：<b id="lock">ARMED</b></div><button class="secondary wide" id="clear">清除 Peak</button></div>
+<div class="seq">本輪步序<b id="seq">—</b></div><div class="foot"><button class="aff" id="aff">🦶 患側腳</button><button class="unaff" id="unaff">🦶 健側腳</button></div><button class="secondary wide" id="manual">🧪 Debug：手動模擬助行器前移</button>
+<div class="card"><b>🧪 Calibration Mode</b><div class="small">每種情境前先清除 Peak，做完動作再記錄。</div>
+<div class="calrow"><span>靜止 Peak</span><span class="cv" id="still">—</span><button class="cap" data-t="still">記錄 Peak</button></div>
+<div class="calrow"><span>輕微干擾 Peak</span><span class="cv" id="minor">—</span><button class="cap" data-t="minor">記錄 Peak</button></div>
+<div class="calrow"><span>Walker Forward</span><span class="cv" id="walker">—</span><button class="cap" data-t="walker">記錄 Peak</button></div></div>
+<div class="controls"><button class="secondary" id="voice">🔊 語音：開</button><button class="secondary" id="reset">↻ 重設本輪</button></div><div class="note">Threshold 為 PoC 校正參數，不代表臨床驗證門檻。</div></div>
 <script>
-let state=0, seq=[], errorOccurred=false, voiceEnabled=true;
-let motionEnabled=false, lastTrigger=0, resetTimer=null;
-
-// 初始門檻：之後會依實際助行器測試調整
-const THRESHOLD=2.20;
-const COOLDOWN=1600;
-
-const $=id=>document.getElementById(id);
-
-$("enableMotion").addEventListener("click", enableMotion);
-$("affected").addEventListener("click", affectedMoved);
-$("unaffected").addEventListener("click", unaffectedMoved);
-$("manualWalker").addEventListener("click", ()=>walkerMoved("手動"));
-$("voiceToggle").addEventListener("click", toggleVoice);
-$("reset").addEventListener("click", resetCycle);
-
-function speak(text){
-  if(!voiceEnabled || !("speechSynthesis" in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang="zh-TW"; u.rate=.92; u.pitch=1; u.volume=1;
-  speechSynthesis.speak(u);
-}
-
-async function enableMotion(){
-  try{
-    // iOS 13+ Safari requires permission from a user gesture.
-    if(typeof DeviceMotionEvent!=="undefined" &&
-       typeof DeviceMotionEvent.requestPermission==="function"){
-      const result=await DeviceMotionEvent.requestPermission();
-      if(result!=="granted") throw new Error("使用者未允許動作感測");
-    }
-
-    if(typeof DeviceMotionEvent==="undefined"){
-      throw new Error("此瀏覽器不支援 DeviceMotion");
-    }
-
-    window.addEventListener("devicemotion", handleMotion, {passive:true});
-    motionEnabled=true;
-    $("sensorState").textContent="ON";
-    $("sensorSupport").textContent="已啟用 · 等待動作";
-    $("enableMotion").textContent="✓ 動作感測已啟用";
-    $("enableMotion").classList.add("enabled");
-    $("enableMotion").disabled=true;
-  }catch(err){
-    $("sensorState").textContent="ERROR";
-    $("sensorSupport").textContent=err.message || "無法取得動作感測權限";
-    alert("無法啟用手機動作感測：\n"+(err.message||err));
-  }
-}
-
-function handleMotion(e){
-  if(!motionEnabled) return;
-
-  // acceleration excludes gravity where supported.
-  const a=e.acceleration;
-  let x=0,y=0,z=0;
-
-  if(a && [a.x,a.y,a.z].some(v=>v!==null)){
-    x=a.x||0; y=a.y||0; z=a.z||0;
-  }else if(e.accelerationIncludingGravity){
-    // Fallback: high-pass-ish change is not attempted in v0.3;
-    // show magnitude but avoid auto-trigger to reduce false positives.
-    const g=e.accelerationIncludingGravity;
-    x=g.x||0; y=g.y||0; z=g.z||0;
-  }else return;
-
-  const mag=Math.sqrt(x*x+y*y+z*z);
-  $("motionValue").textContent=mag.toFixed(2);
-  $("bar").style.width=Math.min(100,(mag/(THRESHOLD*2.2))*100)+"%";
-
-  // Auto-trigger only when acceleration (gravity removed) exists.
-  if(a && state===0 && mag>=THRESHOLD){
-    const now=Date.now();
-    if(now-lastTrigger>COOLDOWN){
-      lastTrigger=now;
-      walkerMoved("IMU");
-    }
-  }
-}
-
-function walkerMoved(source){
-  if(state!==0){
-    if(source==="手動"){ showError("本輪尚未完成"); speak("本輪尚未完成"); }
-    return;
-  }
-  seq.push("助行器");
-  state=1;
-  updateSeq();
-  showWaiting("等待患側腳","下一步：請移動患側腳","🦶");
-  $("sensorSupport").textContent=(source==="IMU"?"✓ IMU 偵測到助行器移動":"Debug 手動事件");
-}
-
-function affectedMoved(){
-  if(state===0){showError("請先移動助行器");speak("請先移動助行器");return}
-  if(state===1){
-    seq.push("患側");state=2;updateSeq();
-    showWaiting(errorOccurred?"已修正":"順序正確","下一步：請移動健側腳","✓");
-    return;
-  }
-  showError("現在應移動健側腳");speak("請移動健側腳");
-}
-
-function unaffectedMoved(){
-  if(state===0){showError("請先移動助行器");speak("請先移動助行器");return}
-  if(state===1){
-    seq.push("健側");errorOccurred=true;updateSeq();
-    showError("請先移動患側腳");speak("請先移動患側腳");return;
-  }
-  if(state===2){
-    seq.push("健側");updateSeq();showCorrect();
-    clearTimeout(resetTimer);resetTimer=setTimeout(resetCycle,1500);
-  }
-}
-
-function updateSeq(){$("sequence").textContent=seq.join(" → ")||"—"}
-function showWaiting(t,i,ic){
-  $("status").className="status waiting";$("title").textContent=t;
-  $("instruction").textContent=i;$("icon").textContent=ic;
-}
-function showError(i){
-  $("status").className="status error";$("title").textContent="步序錯誤";
-  $("instruction").textContent=i;$("icon").textContent="⚠️";
-}
-function showCorrect(){
-  $("status").className="status correct";
-  $("title").textContent=errorOccurred?"已修正":"步序正確";
-  $("instruction").textContent="完成本輪，繼續行走";$("icon").textContent="✓";
-}
-function resetCycle(){
-  clearTimeout(resetTimer);
-  if("speechSynthesis" in window) speechSynthesis.cancel();
-  state=0;seq=[];errorOccurred=false;updateSeq();
-  showWaiting("等待助行器","推動手機／助行器，等待 IMU 偵測","🦯");
-}
-function toggleVoice(){
-  voiceEnabled=!voiceEnabled;
-  $("voiceToggle").textContent=voiceEnabled?"🔊 語音：開":"🔇 語音：關";
-  if(!voiceEnabled && "speechSynthesis" in window) speechSynthesis.cancel();
-  if(voiceEnabled) speak("語音提示已開啟");
-}
-</script>
-</body>
-</html>
+let state=0,seq=[],err=false,voice=true,motion=false,peak=0,thr=2.2,locked=false,timer=null;const $=x=>document.getElementById(x);
+function say(x){if(voice&&speechSynthesis){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(x);u.lang="zh-TW";u.rate=.92;speechSynthesis.speak(u)}}
+$("enable").onclick=async()=>{try{if(typeof DeviceMotionEvent.requestPermission==="function"&&(await DeviceMotionEvent.requestPermission())!=="granted")throw Error("未允許動作感測");addEventListener("devicemotion",move,{passive:true});motion=true;$("sensor").textContent="ON";$("sensorMsg").textContent="已啟用 · 等待動作";$("enable").textContent="✓ 動作感測已啟用";$("enable").disabled=true}catch(e){alert("無法啟用："+e.message)}};
+function move(e){let a=e.acceleration;if(!a)return;let m=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);$("current").textContent=m.toFixed(2);if(m>peak){peak=m;$("peak").textContent=peak.toFixed(2)}if(state===0&&!locked&&m>=thr){locked=true;lock();walker("IMU")}}
+function walker(src){if(state!==0)return;locked=true;lock();seq.push("助行器");state=1;upd();show("等待患側腳","下一步：請移動患側腳","🦶","");$("sensorMsg").textContent=src==="IMU"?"✓ Walker movement detected":"Debug 手動事件"}
+$("manual").onclick=()=>walker("manual");
+$("aff").onclick=()=>{if(state===0){bad("請先移動助行器");say("請先移動助行器")}else if(state===1){seq.push("患側");state=2;upd();show(err?"已修正":"順序正確","下一步：請移動健側腳","✓","")}else{bad("現在應移動健側腳");say("請移動健側腳")}};
+$("unaff").onclick=()=>{if(state===0){bad("請先移動助行器");say("請先移動助行器")}else if(state===1){seq.push("健側");err=true;upd();bad("請先移動患側腳");say("請先移動患側腳")}else{seq.push("健側");upd();show(err?"已修正":"步序正確","完成本輪，繼續行走","✓","ok");timer=setTimeout(reset,1500)}};
+function show(t,i,ic,c){$("status").className="status "+c;$("title").textContent=t;$("inst").textContent=i;$("ico").textContent=ic}function bad(i){show("步序錯誤",i,"⚠️","error")}function upd(){$("seq").textContent=seq.join(" → ")||"—"}function lock(){$("lock").textContent=locked?"LOCKED":"ARMED"}
+function reset(){clearTimeout(timer);state=0;seq=[];err=false;locked=false;lock();upd();show("等待助行器","推動手機／助行器，等待 IMU 偵測","🦯","");$("sensorMsg").textContent=motion?"已啟用 · 等待動作":"尚未啟用"}
+$("reset").onclick=reset;$("clear").onclick=()=>{peak=0;$("peak").textContent="0.00"};$("minus").onclick=()=>chg(-.1);$("plus").onclick=()=>chg(.1);function chg(d){thr=Math.max(.1,Math.round((thr+d)*10)/10);$("thr").textContent=thr.toFixed(2)}
+document.querySelectorAll(".cap").forEach(b=>b.onclick=()=>$(b.dataset.t).textContent=peak.toFixed(2));$("voice").onclick=()=>{voice=!voice;$("voice").textContent=voice?"🔊 語音：開":"🔇 語音：關";if(voice)say("語音提示已開啟")};
+</script></body></html>
