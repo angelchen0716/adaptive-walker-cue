@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-Hant"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Adaptive Walker Cue v0.9.2</title>
+<title>Adaptive Walker Cue v0.9.3</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:14px;background:#f3f4f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937}
 .app{max-width:480px;margin:auto}.hero{background:#fff;border-radius:25px;padding:20px 17px;box-shadow:0 8px 30px #0000000d}
@@ -18,7 +18,7 @@ button{border:0;border-radius:13px;min-height:46px;font-weight:650;touch-action:
 input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.debug button{font-size:10px;background:#fff;border:1px solid #d1d5db}
 .log{font-family:ui-monospace,monospace;font-size:9px;background:#111827;color:#d1fae5;border-radius:10px;padding:7px;white-space:pre-wrap}
 </style></head><body><div class="app"><div class="hero">
-<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9.2 · Front Walker View</div>
+<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9.3 · Front Walker View + L/R Mapping</div>
 <div id="stateBox" class="state"><div id="icon" class="icon">🦯</div><div id="title" class="title">準備開始</div><div id="instruction" class="instruction">先完成 Camera、腳部校正、IMU 與 Voice 啟用</div></div>
 <div class="progress"><span id="p0" class="step active">助行器</span><span class="arrow">→</span><span id="p1" class="step">患側腳</span><span class="arrow">→</span><span id="p2" class="step">健側腳</span><span class="arrow">→</span><span id="p3" class="step">完成</span></div>
 <div class="ready"><span id="rCam">Camera OFF</span><span id="rCal">Feet 未校正</span><span id="rImu">IMU OFF</span><span id="rVoice">Voice OFF</span></div>
@@ -26,10 +26,10 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 </div>
 
 <details class="eng" open><summary>⚙️ Engineering Mode</summary>
-<div class="card"><div class="row"><b>1. Camera</b><span id="camState" class="pill">OFF</span></div><div class="small" style="margin:6px 0">新版視角：鏡頭位於助行器前方中央、朝向使用者並略向下。畫面應同時看到左右小腿、腳踝、完整鞋子與少量地面；不需要看到上半身。</div><button id="camBtn" class="primary">啟用後鏡頭</button>
+<div class="card"><div class="row"><b>1. Camera</b><span id="camState" class="pill">OFF</span></div><div class="small" style="margin:6px 0">新版視角：鏡頭位於助行器前方中央、朝向使用者並略向下。畫面應同時看到左右小腿、腳踝、完整鞋子與少量地面。後鏡頭朝向使用者時，預設使用 Swapped mapping。</div><button id="camBtn" class="primary">啟用後鏡頭</button>
 <div id="camView" class="camera" hidden><video id="video" autoplay playsinline muted></video><div class="roi a"><span>LEFT ZONE</span></div><div class="roi b"><span>RIGHT ZONE</span></div></div></div>
 
-<div class="card"><div class="row"><b>2. Front-view Calibration</b><span id="map" class="pill">—</span></div><div class="small" id="calText">手機固定在助行器前橫桿中央，讓兩隻小腿＋完整鞋子各自落在左右區域。</div><button id="calBtn" class="primary" disabled>開始校正</button>
+<div class="card"><div class="row"><b>2. Front-view Calibration</b><span id="map" class="pill">—</span></div><div class="small" id="calText">手機固定在助行器前橫桿中央，讓兩隻小腿＋完整鞋子各自落在左右區域。按一次建立靜止 baseline；左右腳對應請用 Foot Mapping 設定。</div><button id="calBtn" class="primary" disabled>開始校正</button>
 <div class="two" style="margin-top:7px"><div class="metric">ROI A<b id="aVal">0%</b></div><div class="metric">ROI B<b id="bVal">0%</b></div></div></div>
 
 <div class="card"><div class="row"><b>3. Walker IMU</b><span id="imuState" class="pill">OFF</span></div><button id="imuBtn" class="primary">啟用動作感測</button>
@@ -39,12 +39,21 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 <div class="card"><div class="row"><span class="small">患側</span><select id="affected"><option value="left">左側</option><option value="right">右側</option></select></div>
 <div style="margin-top:8px"><div class="row"><span class="small">Vision threshold</span><b id="vTL">30%</b></div><input id="vT" type="range" min="10" max="60" value="30"></div>
 <div style="margin-top:8px"><div class="row"><span class="small">Dominance</span><b id="domL">1.25×</b></div><input id="dom" type="range" min="115" max="200" step="5" value="125"></div></div>
+<div class="card">
+<div class="row"><b>5. Foot Mapping</b><span id="mappingState" class="pill">SWAPPED</span></div>
+<div class="small" style="margin-top:4px">你現在是「後鏡頭位於助行器前方、朝向使用者」，因此預設把畫面左右換算成使用者本人的左右。</div>
+<select id="mappingMode" style="margin-top:7px">
+<option value="swapped" selected>Swapped：畫面左 = 使用者右｜畫面右 = 使用者左</option>
+<option value="normal">Normal：畫面左 = 使用者左｜畫面右 = 使用者右</option>
+</select>
+<div id="mappingExplain" class="small" style="margin-top:6px"><b>目前：</b>Screen Left → User Right；Screen Right → User Left</div>
+</div>
 
 <div class="card"><div class="row"><b>4. Voice Cue</b><span id="voiceState" class="pill">OFF</span></div>
 <div class="small">iPhone Safari 需要由使用者點擊一次來解鎖語音。正式 Demo 前請先測試。</div>
 <button id="voiceBtn" class="primary" style="margin-top:7px">🔊 啟用／測試語音</button></div>
 <div class="card"><b>Debug fallback</b><div class="debug" style="margin-top:6px"><button id="dw">WALKER</button><button id="dl">LEFT</button><button id="dr">RIGHT</button></div></div>
-<div id="log" class="log">v0.9 loaded ✓</div>
+<div id="log" class="log">v0.9.3 loaded ✓</div>
 </details></div>
 
 <script>
@@ -81,7 +90,11 @@ function diff(a,b,x0,x1,y0,y1){let n=0,t=0;for(let y=y0;y<y1;y+=2)for(let x=x0;x
 function vals(f){let y0=H*.25|0,y1=H*.93|0;return[diff(f,base,W*.05|0,W*.47|0,y0,y1),diff(f,base,W*.53|0,W*.95|0,y0,y1)]}
 function setBase(){let f=frame();if(!f)return false;base=new Uint8Array(f);baseAt=Date.now();candidate=null;count=0;visionLock=false;return true}
 function avg(a,k){return a.reduce((s,v)=>s+v[k],0)/Math.max(1,a.length)}
-function physical(v){return leftROI==="A"?{left:v[0],right:v[1]}:{left:v[1],right:v[0]}}
+function physical(v){
+ let mode=$("mappingMode").value;
+ if(mode==="swapped") return {left:v[1],right:v[0]};
+ return {left:v[0],right:v[1]};
+}:{left:v[1],right:v[0]}}
 function ui(t,i,ic,cl=""){$("stateBox").className="state "+cl;$("title").textContent=t;$("instruction").textContent=i;$("icon").textContent=ic}
 function progress(n){for(let i=0;i<4;i++){$("p"+i).className="step"+(i<n?" done":i===n?" active":"")}}
 function baselineSoon(ms=350){base=null;visionLock=true;setTimeout(()=>{if(state>0&&running){setBase();log("Vision baseline refreshed.")}},ms)}
@@ -100,7 +113,7 @@ function foot(side){
  }
 }
 function detect(v){
- if(!leftROI||!base||Date.now()-baseAt<150||visionLock)return;
+ if(!base||Date.now()-baseAt<150||visionLock)return;
  let p=physical(v),t=+$("vT").value,d=+$("dom").value/100,c=null;
  if(p.left>=t&&p.left>p.right*d)c="left";else if(p.right>=t&&p.right>p.left*d)c="right";
  if(c){if(candidate===c)count++;else{candidate=c;count=1}if(count>=2){visionLock=true;candidate=null;count=0;foot(c)}}else{candidate=null;count=0}
@@ -108,13 +121,24 @@ function detect(v){
 function loop(ts){if(!running)return;if(ts-last>110){last=ts;if(base){let f=frame();if(f){let v=vals(f);$("aVal").textContent=v[0].toFixed(0)+"%";$("bVal").textContent=v[1].toFixed(0)+"%";if(calPhase===2||calPhase===4)samples.push(v);else if(state===1||state===2)detect(v)}}}requestAnimationFrame(loop)}
 async function camera(){try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:720},height:{ideal:1280}}});$("video").srcObject=stream;await $("video").play();running=true;$("camView").hidden=false;$("camState").textContent="ON";$("rCam").textContent="Camera ON";$("rCam").classList.add("on");$("camBtn").disabled=true;$("calBtn").disabled=false;requestAnimationFrame(loop);log("Camera ready ✓")}catch(e){log(e.name+": "+e.message);alert(e.message)}}
 function calibrate(){
- if(calPhase===0){setBase();calPhase=1;$("calText").textContent="準備只移動左腳，再按下方按鈕。";$("calBtn").textContent="▶ 記錄左腳";return}
- if(calPhase===1){setBase();samples=[];calPhase=2;$("calText").textContent="現在慢慢移動左腳…";$("calBtn").disabled=true;setTimeout(()=>{leftCal=[avg(samples,0),avg(samples,1)];calPhase=3;$("calText").textContent=`左腳完成 A ${leftCal[0].toFixed(0)}% / B ${leftCal[1].toFixed(0)}%。回原位。`;$("calBtn").textContent="▶ 記錄右腳";$("calBtn").disabled=false},1200);return}
- if(calPhase===3){setBase();samples=[];calPhase=4;$("calText").textContent="現在慢慢移動右腳…";$("calBtn").disabled=true;setTimeout(()=>{let ra=avg(samples,0),rb=avg(samples,1),normal=(leftCal[0]-leftCal[1])+(rb-ra),swap=(leftCal[1]-leftCal[0])+(ra-rb);leftROI=normal>=swap?"A":"B";rightROI=leftROI==="A"?"B":"A";calPhase=0;base=null;$("map").textContent=`L=${leftROI} R=${rightROI}`;$("rCal").textContent="Feet 已校正";$("rCal").classList.add("on");$("calText").textContent="校正完成 ✓";$("calBtn").textContent="重新校正";$("calBtn").disabled=false;log(`Mapping: LEFT=${leftROI}, RIGHT=${rightROI}`)},1200)}
+ if(setBase()){
+   $("map").textContent="READY";
+   $("rCal").textContent="Feet 已校正";
+   $("rCal").classList.add("on");
+   $("calText").textContent="雙腳靜止基準已建立 ✓；左右對應由 Foot Mapping 控制。";
+   log("Foot baseline captured. Mapping controlled by Foot Mapping setting.");
+ }
 }
 async function imu(){try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){let p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw Error("Motion permission denied")}addEventListener("devicemotion",e=>{let a=e.acceleration;if(!a)return;let m=Math.hypot(a.x||0,a.y||0,a.z||0);$("cur").textContent=m.toFixed(2);if(m>peak){peak=m;$("peak").textContent=peak.toFixed(2)}if(state===0&&!walkerLock&&m>=imuThr)walker()},{passive:true});imuOn=true;$("imuState").textContent="ON";$("rImu").textContent="IMU ON";$("rImu").classList.add("on");$("imuBtn").disabled=true;log("IMU ready ✓")}catch(e){log("IMU: "+e.message);alert(e.message)}}
-function reset(){state=0;walkerLock=false;visionLock=false;base=null;candidate=null;count=0;error=false;progress(0);ui("準備開始",leftROI&&imuOn?"移動助行器開始":"先完成 Camera、腳部校正、IMU 與 Voice 啟用","🦯")}
+function reset(){state=0;walkerLock=false;visionLock=false;base=null;candidate=null;count=0;error=false;progress(0);ui("準備開始",imuOn?"移動助行器開始":"先完成 Camera、腳部校正、IMU 與 Voice 啟用","🦯")}
 $("voiceBtn").onclick=unlockVoice;$("camBtn").onclick=camera;$("calBtn").onclick=calibrate;$("imuBtn").onclick=imu;$("reset").onclick=reset;$("dw").onclick=walker;$("dl").onclick=()=>foot("left");$("dr").onclick=()=>foot("right");
 $("minus").onclick=()=>{imuThr=Math.max(.1,Math.round((imuThr-.1)*10)/10);$("imuT").textContent=imuThr.toFixed(2)};$("plus").onclick=()=>{imuThr=Math.round((imuThr+.1)*10)/10;$("imuT").textContent=imuThr.toFixed(2)};
-$("vT").oninput=()=>$("vTL").textContent=$("vT").value+"%";$("dom").oninput=()=>$("domL").textContent=(+$("dom").value/100).toFixed(2)+"×";
+$("mappingMode").onchange=()=>{
+ let swapped=$("mappingMode").value==="swapped";
+ $("mappingState").textContent=swapped?"SWAPPED":"NORMAL";
+ $("mappingExplain").innerHTML=swapped
+   ? "<b>目前：</b>Screen Left → User Right；Screen Right → User Left"
+   : "<b>目前：</b>Screen Left → User Left；Screen Right → User Right";
+ log(swapped?"Mapping set to SWAPPED.":"Mapping set to NORMAL.");
+};$("vT").oninput=()=>$("vTL").textContent=$("vT").value+"%";$("dom").oninput=()=>$("domL").textContent=(+$("dom").value/100).toFixed(2)+"×";
 })();</script></body></html>

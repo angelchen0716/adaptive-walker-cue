@@ -1,23 +1,27 @@
-Adaptive Walker Cue v0.9.2 — Front Walker View
+Adaptive Walker Cue v0.9.3 — Front Walker View + L/R Mapping
 
-這版配合新的實際助行器視角：
-- 手機裝在前方橫桿中央。
-- 後鏡頭朝使用者並略向下。
-- 畫面保留左右小腿、腳踝、完整鞋子與少量地面。
-- LEFT / RIGHT ROI 改成更高、更寬的長條區域，適合目前照片中的構圖。
-- Walker 移動後等待時間加長到約 500 ms，再建立 baseline，降低助行器本身晃動造成的假訊號。
-- 每一步之後重新 baseline。
-- Vision threshold 預設仍 30%；dominance 改為 1.25x。
-- 保留左右腳 calibration、IMU、Voice、Debug fallback。
+新增：
+- Foot Mapping 選項
+  1. Swapped（預設）：Screen Left = User Right；Screen Right = User Left
+  2. Normal：Screen Left = User Left；Screen Right = User Right
+- 針對「後鏡頭裝在助行器前方、朝向使用者」情境，預設採 Swapped。
+- 畫面仍維持 LEFT ZONE / RIGHT ZONE，但判斷前會先套用 mapping。
+- 左右不再靠硬編碼或記憶。
 
-第一次實機測試：
-1. 手機先固定好，不要手持。
-2. Camera ON。
-3. 確認兩腳各自在 LEFT/RIGHT ZONE，鞋子不要跨過中央太多。
-4. 完成左右腳 calibration。
-5. Voice ON。
-6. 先用 Debug WALKER → 真實移左腳/右腳測 Vision。
-7. Vision 穩定後才啟用 IMU。
-8. 最後測真實 Walker → 患側 → 健側。
+建議測試：
+1. Camera ON
+2. 雙腳靜止 → 建立 baseline
+3. Foot Mapping 保持 Swapped
+4. Debug WALKER
+5. 只移動「使用者左腳」
+   - 系統應判定 User LEFT
+6. 重設
+7. Debug WALKER
+8. 只移動「使用者右腳」
+   - 系統應判定 User RIGHT
+9. 若剛好相反，改成 Normal 即可
+10. 再測 Walker → 患側 → 健側
 
-若 LEFT/RIGHT 在固定後仍系統性顛倒，不要改支架，下一版直接加入 Mirror toggle。
+注意：
+- 這裡的 LEFT/RIGHT 指使用者本人的左右，不是畫面左右。
+- 若未來改用前鏡頭、鏡像顯示或不同安裝方向，不需重寫程式，只需切換 Foot Mapping。
