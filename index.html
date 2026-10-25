@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-Hant"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Adaptive Walker Cue v0.9.3</title>
+<title>Adaptive Walker Cue v0.9.3.1</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:14px;background:#f3f4f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937}
 .app{max-width:480px;margin:auto}.hero{background:#fff;border-radius:25px;padding:20px 17px;box-shadow:0 8px 30px #0000000d}
@@ -18,7 +18,7 @@ button{border:0;border-radius:13px;min-height:46px;font-weight:650;touch-action:
 input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.debug button{font-size:10px;background:#fff;border:1px solid #d1d5db}
 .log{font-family:ui-monospace,monospace;font-size:9px;background:#111827;color:#d1fae5;border-radius:10px;padding:7px;white-space:pre-wrap}
 </style></head><body><div class="app"><div class="hero">
-<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9.3 · Front Walker View + L/R Mapping</div>
+<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9.3.1 · L/R Mapping Hotfix</div>
 <div id="stateBox" class="state"><div id="icon" class="icon">🦯</div><div id="title" class="title">準備開始</div><div id="instruction" class="instruction">先完成 Camera、腳部校正、IMU 與 Voice 啟用</div></div>
 <div class="progress"><span id="p0" class="step active">助行器</span><span class="arrow">→</span><span id="p1" class="step">患側腳</span><span class="arrow">→</span><span id="p2" class="step">健側腳</span><span class="arrow">→</span><span id="p3" class="step">完成</span></div>
 <div class="ready"><span id="rCam">Camera OFF</span><span id="rCal">Feet 未校正</span><span id="rImu">IMU OFF</span><span id="rVoice">Voice OFF</span></div>
@@ -53,7 +53,7 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 <div class="small">iPhone Safari 需要由使用者點擊一次來解鎖語音。正式 Demo 前請先測試。</div>
 <button id="voiceBtn" class="primary" style="margin-top:7px">🔊 啟用／測試語音</button></div>
 <div class="card"><b>Debug fallback</b><div class="debug" style="margin-top:6px"><button id="dw">WALKER</button><button id="dl">LEFT</button><button id="dr">RIGHT</button></div></div>
-<div id="log" class="log">v0.9.3 loaded ✓</div>
+<div id="log" class="log">v0.9.3.1 loaded · button handlers ready ✓</div>
 </details></div>
 
 <script>
@@ -94,7 +94,7 @@ function physical(v){
  let mode=$("mappingMode").value;
  if(mode==="swapped") return {left:v[1],right:v[0]};
  return {left:v[0],right:v[1]};
-}:{left:v[1],right:v[0]}}
+}
 function ui(t,i,ic,cl=""){$("stateBox").className="state "+cl;$("title").textContent=t;$("instruction").textContent=i;$("icon").textContent=ic}
 function progress(n){for(let i=0;i<4;i++){$("p"+i).className="step"+(i<n?" done":i===n?" active":"")}}
 function baselineSoon(ms=350){base=null;visionLock=true;setTimeout(()=>{if(state>0&&running){setBase();log("Vision baseline refreshed.")}},ms)}

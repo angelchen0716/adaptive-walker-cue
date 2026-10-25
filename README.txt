@@ -1,27 +1,14 @@
-Adaptive Walker Cue v0.9.3 — Front Walker View + L/R Mapping
+Adaptive Walker Cue v0.9.3.1 — Button Hotfix
 
-新增：
-- Foot Mapping 選項
-  1. Swapped（預設）：Screen Left = User Right；Screen Right = User Left
-  2. Normal：Screen Left = User Left；Screen Right = User Right
-- 針對「後鏡頭裝在助行器前方、朝向使用者」情境，預設採 Swapped。
-- 畫面仍維持 LEFT ZONE / RIGHT ZONE，但判斷前會先套用 mapping。
-- 左右不再靠硬編碼或記憶。
+修正：
+- 修正 v0.9.3 Foot Mapping 函式殘留字元造成的 JavaScript syntax error。
+- Camera / Calibration / IMU / Voice / Debug 按鈕事件可正常綁定。
+- 保留 Swapped / Normal Foot Mapping。
+- Swapped 預設：Screen Left = User Right；Screen Right = User Left。
 
 建議測試：
-1. Camera ON
-2. 雙腳靜止 → 建立 baseline
-3. Foot Mapping 保持 Swapped
-4. Debug WALKER
-5. 只移動「使用者左腳」
-   - 系統應判定 User LEFT
-6. 重設
-7. Debug WALKER
-8. 只移動「使用者右腳」
-   - 系統應判定 User RIGHT
-9. 若剛好相反，改成 Normal 即可
-10. 再測 Walker → 患側 → 健側
-
-注意：
-- 這裡的 LEFT/RIGHT 指使用者本人的左右，不是畫面左右。
-- 若未來改用前鏡頭、鏡像顯示或不同安裝方向，不需重寫程式，只需切換 Foot Mapping。
+1. 上傳此 index.html 覆蓋 GitHub Pages 根目錄舊檔。
+2. 用 ?v=0931 開啟，避免 Safari cache。
+3. 先按「啟用後鏡頭」；應跳出相機權限或直接開啟。
+4. 再測「啟用／測試語音」。
+5. Debug WALKER / LEFT / RIGHT 都應可按。
