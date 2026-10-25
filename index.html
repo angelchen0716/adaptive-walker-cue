@@ -1,6 +1,6 @@
 <!doctype html><html lang="zh-Hant"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Adaptive Walker Cue v0.9</title>
+<title>Adaptive Walker Cue v0.9.2</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:14px;background:#f3f4f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937}
 .app{max-width:480px;margin:auto}.hero{background:#fff;border-radius:25px;padding:20px 17px;box-shadow:0 8px 30px #0000000d}
@@ -13,12 +13,12 @@ button{border:0;border-radius:13px;min-height:46px;font-weight:650;touch-action:
 .ready{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}.ready span{font-size:10px;padding:5px 8px;border-radius:99px;background:#eee}.ready .on{background:#e1f2e7;color:#166534}
 .eng{margin-top:12px;background:#fff;border-radius:20px;padding:14px}.eng summary{font-weight:700;cursor:pointer}.card{background:#f7f7f5;padding:12px;border-radius:14px;margin-top:10px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .camera{position:relative;aspect-ratio:3/4;background:#111;border-radius:14px;overflow:hidden;margin-top:8px}video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.roi{position:absolute;top:25%;height:68%;width:42%;border:2px dashed #fff;border-radius:14px}.a{left:5%}.b{right:5%}.roi span{display:block;text-align:center;color:#fff;font-size:10px;margin-top:5px}
+.roi{position:absolute;top:18%;height:76%;width:44%;border:2px dashed #fff;border-radius:14px}.a{left:3%}.b{right:3%}.roi span{display:block;text-align:center;color:#fff;font-size:10px;margin-top:5px}
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px}.metric{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:7px;text-align:center}.metric b{display:block}
 input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.debug button{font-size:10px;background:#fff;border:1px solid #d1d5db}
 .log{font-family:ui-monospace,monospace;font-size:9px;background:#111827;color:#d1fae5;border-radius:10px;padding:7px;white-space:pre-wrap}
 </style></head><body><div class="app"><div class="hero">
-<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9 · Closed-loop Prototype</div>
+<h1>ADAPTIVE WALKER CUE</h1><div class="sub">v0.9.2 · Front Walker View</div>
 <div id="stateBox" class="state"><div id="icon" class="icon">🦯</div><div id="title" class="title">準備開始</div><div id="instruction" class="instruction">先完成 Camera、腳部校正、IMU 與 Voice 啟用</div></div>
 <div class="progress"><span id="p0" class="step active">助行器</span><span class="arrow">→</span><span id="p1" class="step">患側腳</span><span class="arrow">→</span><span id="p2" class="step">健側腳</span><span class="arrow">→</span><span id="p3" class="step">完成</span></div>
 <div class="ready"><span id="rCam">Camera OFF</span><span id="rCal">Feet 未校正</span><span id="rImu">IMU OFF</span><span id="rVoice">Voice OFF</span></div>
@@ -26,10 +26,10 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 </div>
 
 <details class="eng" open><summary>⚙️ Engineering Mode</summary>
-<div class="card"><div class="row"><b>1. Camera</b><span id="camState" class="pill">OFF</span></div><button id="camBtn" class="primary">啟用後鏡頭</button>
-<div id="camView" class="camera" hidden><video id="video" autoplay playsinline muted></video><div class="roi a"><span>ROI A</span></div><div class="roi b"><span>ROI B</span></div></div></div>
+<div class="card"><div class="row"><b>1. Camera</b><span id="camState" class="pill">OFF</span></div><div class="small" style="margin:6px 0">新版視角：鏡頭位於助行器前方中央、朝向使用者並略向下。畫面應同時看到左右小腿、腳踝、完整鞋子與少量地面；不需要看到上半身。</div><button id="camBtn" class="primary">啟用後鏡頭</button>
+<div id="camView" class="camera" hidden><video id="video" autoplay playsinline muted></video><div class="roi a"><span>LEFT ZONE</span></div><div class="roi b"><span>RIGHT ZONE</span></div></div></div>
 
-<div class="card"><div class="row"><b>2. Left / Right Calibration</b><span id="map" class="pill">—</span></div><div class="small" id="calText">啟用 Camera 後開始。</div><button id="calBtn" class="primary" disabled>開始校正</button>
+<div class="card"><div class="row"><b>2. Front-view Calibration</b><span id="map" class="pill">—</span></div><div class="small" id="calText">手機固定在助行器前橫桿中央，讓兩隻小腿＋完整鞋子各自落在左右區域。</div><button id="calBtn" class="primary" disabled>開始校正</button>
 <div class="two" style="margin-top:7px"><div class="metric">ROI A<b id="aVal">0%</b></div><div class="metric">ROI B<b id="bVal">0%</b></div></div></div>
 
 <div class="card"><div class="row"><b>3. Walker IMU</b><span id="imuState" class="pill">OFF</span></div><button id="imuBtn" class="primary">啟用動作感測</button>
@@ -38,7 +38,7 @@ input[type=range],select{width:100%}.debug{display:grid;grid-template-columns:re
 
 <div class="card"><div class="row"><span class="small">患側</span><select id="affected"><option value="left">左側</option><option value="right">右側</option></select></div>
 <div style="margin-top:8px"><div class="row"><span class="small">Vision threshold</span><b id="vTL">30%</b></div><input id="vT" type="range" min="10" max="60" value="30"></div>
-<div style="margin-top:8px"><div class="row"><span class="small">Dominance</span><b id="domL">1.35×</b></div><input id="dom" type="range" min="115" max="200" step="5" value="135"></div></div>
+<div style="margin-top:8px"><div class="row"><span class="small">Dominance</span><b id="domL">1.25×</b></div><input id="dom" type="range" min="115" max="200" step="5" value="125"></div></div>
 
 <div class="card"><div class="row"><b>4. Voice Cue</b><span id="voiceState" class="pill">OFF</span></div>
 <div class="small">iPhone Safari 需要由使用者點擊一次來解鎖語音。正式 Demo 前請先測試。</div>
@@ -86,17 +86,17 @@ function ui(t,i,ic,cl=""){$("stateBox").className="state "+cl;$("title").textCon
 function progress(n){for(let i=0;i<4;i++){$("p"+i).className="step"+(i<n?" done":i===n?" active":"")}}
 function baselineSoon(ms=350){base=null;visionLock=true;setTimeout(()=>{if(state>0&&running){setBase();log("Vision baseline refreshed.")}},ms)}
 function walker(){
- if(state!==0)return;state=1;walkerLock=true;error=false;progress(1);ui("等待患側腳","需要時才提醒","👣");baselineSoon(350);
+ if(state!==0)return;state=1;walkerLock=true;error=false;progress(1);ui("等待患側腳","需要時才提醒","👣");baselineSoon(500);
 }
 function foot(side){
  if(state===0){ui("請先移動助行器","步序尚未開始","⚠️","error");say("請先移動助行器");return}
  let aff=side===$("affected").value;
  if(state===1){
-   if(aff){state=2;progress(2);ui(error?"已修正：請移動健側腳":"患側正確","下一步：健側腳","✓");baselineSoon(260)}
-   else{error=true;ui("請先移動患側腳","偵測到健側腳先移動","⚠️","error");say("請先移動患側腳");baselineSoon(300)}
+   if(aff){state=2;progress(2);ui(error?"已修正：請移動健側腳":"患側正確","下一步：健側腳","✓");baselineSoon(350)}
+   else{error=true;ui("請先移動患側腳","偵測到健側腳先移動","⚠️","error");say("請先移動患側腳");baselineSoon(400)}
  }else if(state===2){
    if(!aff){state=3;progress(3);ui("步序完成","Walker → 患側 → 健側 ✓","✓","ok");setTimeout(reset,1600)}
-   else{ui("請移動健側腳","患側腳已完成","⚠️","error");say("請移動健側腳");baselineSoon(300)}
+   else{ui("請移動健側腳","患側腳已完成","⚠️","error");say("請移動健側腳");baselineSoon(400)}
  }
 }
 function detect(v){
@@ -106,7 +106,7 @@ function detect(v){
  if(c){if(candidate===c)count++;else{candidate=c;count=1}if(count>=2){visionLock=true;candidate=null;count=0;foot(c)}}else{candidate=null;count=0}
 }
 function loop(ts){if(!running)return;if(ts-last>110){last=ts;if(base){let f=frame();if(f){let v=vals(f);$("aVal").textContent=v[0].toFixed(0)+"%";$("bVal").textContent=v[1].toFixed(0)+"%";if(calPhase===2||calPhase===4)samples.push(v);else if(state===1||state===2)detect(v)}}}requestAnimationFrame(loop)}
-async function camera(){try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"}}});$("video").srcObject=stream;await $("video").play();running=true;$("camView").hidden=false;$("camState").textContent="ON";$("rCam").textContent="Camera ON";$("rCam").classList.add("on");$("camBtn").disabled=true;$("calBtn").disabled=false;requestAnimationFrame(loop);log("Camera ready ✓")}catch(e){log(e.name+": "+e.message);alert(e.message)}}
+async function camera(){try{stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:720},height:{ideal:1280}}});$("video").srcObject=stream;await $("video").play();running=true;$("camView").hidden=false;$("camState").textContent="ON";$("rCam").textContent="Camera ON";$("rCam").classList.add("on");$("camBtn").disabled=true;$("calBtn").disabled=false;requestAnimationFrame(loop);log("Camera ready ✓")}catch(e){log(e.name+": "+e.message);alert(e.message)}}
 function calibrate(){
  if(calPhase===0){setBase();calPhase=1;$("calText").textContent="準備只移動左腳，再按下方按鈕。";$("calBtn").textContent="▶ 記錄左腳";return}
  if(calPhase===1){setBase();samples=[];calPhase=2;$("calText").textContent="現在慢慢移動左腳…";$("calBtn").disabled=true;setTimeout(()=>{leftCal=[avg(samples,0),avg(samples,1)];calPhase=3;$("calText").textContent=`左腳完成 A ${leftCal[0].toFixed(0)}% / B ${leftCal[1].toFixed(0)}%。回原位。`;$("calBtn").textContent="▶ 記錄右腳";$("calBtn").disabled=false},1200);return}
